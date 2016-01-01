@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<!--
+    Document   : configuration.xml
+    Created on : May 16, 2009, 10:00 PM
+    Author     : zhuyang@ebay.com
+-->
+
+
+
+<properties>
+
+<!--
+  
+      <entry key="logging">true</entry>
+      <entry key="getJobStatusQueryInterval">10000</entry>
+      <entry key="bulkDataExchangeURL">https://webservices.ebay.com/BulkDataExchangeService</entry>  
+      <entry key="fileTransferURL">https://storage.ebay.com/FileTransferService</entry>
+      <entry key="userToken">replace this with your Production token</entry>
+-->
+      
+
+      <entry key="logging">true</entry>
+      <entry key="getJobStatusQueryInterval">10000</entry>
+      <entry key="bulkDataExchangeURL">https://webservices.sandbox.ebay.com/BulkDataExchangeService</entry>  
+      <entry key="fileTransferURL">https://storage.sandbox.ebay.com/FileTransferService</entry>
+      <entry key="userToken">AgAAAA**AQAAAA**aAAAAA**Ae1hTw**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4GhCJWLpQudj6x9nY+seQ**s8MBAA**AAMAAA**yrKSp1banlQiH++1T3ot6XORT+cCsZz3bBzakKQKza37osQ/EgVUK79iFi6qcdKTFkAJ2EwBQYy5oftyBbqfYCtT0z9WPcgnNWMoSsz3QVhd3tw9wBy/WsfU1twwh2Ts9ffxlM0zpj8wlXuTcj2tuTiRvTb7apuN/xby/odVEAixqpywLMbWHI+wtspjjzop1d6MH0LFM4Cadqns34HKuYUOjIr1TVtuVQ5gkR/xnKPD09asVRQcNeODO5nFv1CGgp8hQT2Ry/HyIL0iKAvsDfyqRJuVmTGcvTtjrVxVnBnL153uNnFz+KmXE2aA2yL8e41g8D5StaK2VsnaYy125HQeIPSQhdf+Bnl6GtJMXPgr742Hrqv0wmYbAW3TUg1+WrHzLrHV429kxxY1katnaXWocS+XePdzDWYjKPr8LRclFqrFls55sbrnAIQZnweQDEUfWRwhFsLKtn+363uRJI1aEkMbwc3IcTzFlXPXsIGjgN2vxygeyLFL4hlV7h/acG4NR1wIa95b1hsOhrcCbLfiyFRHIZeISQbt4lAz28dSXC0fh+5wDLvN0sr24h7AGhuopEP3vADTexIUjyynbzcs1oC2e6r7ygDggJlL6bfRMbqqpYDFYmK3QVHi0jMsk1A/gVdt3sdpdTMgKRkSAgNAW1LqcAH85+iEnU6JiTNZ3s6moSzJGhXACzT0rYkeMQxaLC12OiZd2mtyhHH7D9IMkWtS+YxB9F93FMW1+yZj6Y172PKep6KlN+mu82Rv</entry>
+
+</properties>

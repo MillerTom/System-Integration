@@ -1,0 +1,663 @@
+package controllers;
+
+import com.ebay.marketplace.services.*;
+import controllers.util.*;
+import daos.LogsFacade;
+import daos.ReportsFacade;
+import daos.UsersFacade;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import javax.activation.DataHandler;
+import javax.ejb.EJB;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
+import javax.faces.convert.Converter;
+import javax.faces.convert.FacesConverter;
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import model.*;
+import pojos.Reports;
+import pojos.Users;
+import pojos.ValidEntry;
+
+@ManagedBean(name = "reportsController")
+@SessionScoped
+public class ReportsController implements Serializable {
+
+    private Reports current;
+    private DataModel items = null;
+    @EJB
+    private daos.ReportsFacade ejbFacade;
+    @EJB
+    private daos.UsersFacade ejbUsersFacade;
+    @EJB
+    private daos.LogsFacade ejbLogsFacade;
+    private PaginationHelper pagination;
+    private int selectedItemIndex;
+
+    public ReportsController() {
+    }
+
+    public Reports getSelected() {
+        if (current == null) {
+            current = new Reports();
+            selectedItemIndex = -1;
+        }
+        return current;
+    }
+
+    private ReportsFacade getFacade() {
+        return ejbFacade;
+    }
+
+    private LogsFacade getLogsFacade() {
+        return ejbLogsFacade;
+    }
+
+    private UsersFacade getUsersFacade() {
+        return ejbUsersFacade;
+    }
+
+    public PaginationHelper getPagination() {
+        if (pagination == null) {
+            pagination = new PaginationHelper(30) {
+
+                @Override
+                public int getItemsCount() {
+                    return getFacade().count();
+                }
+
+                @Override
+                public DataModel createPageDataModel() {
+                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                }
+            };
+        }
+        return pagination;
+    }
+
+    public String prepareList() {
+        recreateModel();
+        return "List?faces-redirect=true";
+    }
+
+    public String prepareView() {
+        current = (Reports) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        return "View?faces-redirect=true";
+    }
+
+    public String prepareCreate() {
+        current = new Reports();
+        selectedItemIndex = -1;
+        return "Create?faces-redirect=true";
+    }
+
+    public String create() {
+        try {
+            getFacade().create(current);
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("ReportsCreated"));
+            return prepareCreate();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return null;
+        }
+    }
+
+    public String prepareEdit() {
+        current = (Reports) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        return "Edit?faces-redirect=true";
+    }
+
+    public String update() {
+        try {
+            getFacade().edit(current);
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("ReportsUpdated"));
+            return "View?faces-redirect=true";
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return null;
+        }
+    }
+
+    public String destroy() {
+        current = (Reports) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        performDestroy();
+        recreatePagination();
+        recreateModel();
+        return "List?faces-redirect=true";
+    }
+
+    public String destroyAndView() {
+        performDestroy();
+        recreateModel();
+        updateCurrentItem();
+        if (selectedItemIndex >= 0) {
+            return "View?faces-redirect=true";
+        } else {
+            // all items were removed - go back to list
+            recreateModel();
+            return "List?faces-redirect=true";
+        }
+    }
+
+    /**
+     * delete Report File
+     */
+    private void performDestroy() {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        try {
+            File currentFile = new File(current.getFileName());
+            boolean deleteresult = currentFile.delete();
+            if (deleteresult) {
+                getFacade().remove(current);
+                logger.log("Successfully deleted Report File [" + current.getFileName() + "]", "INFO");
+                JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("ReportsDestroyd"));
+            } else {
+                getFacade().remove(current);
+                logger.log("can not delete Report File [" + current.getFileName() + "], cause it is not found", "ERROR");
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            }
+        } catch (Exception e) {
+            logger.log("failed to delete Report File [" + current.getFileName() + "], due to This Exception [" + ExceptionHandler.getStackTraceAsString(e) + "]", "EXCEPTION");
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+        }
+    }
+
+    private void updateCurrentItem() {
+        int count = getFacade().count();
+        if (selectedItemIndex >= count) {
+            // selected index cannot be bigger than number of items:
+            selectedItemIndex = count - 1;
+            // go to previous page if last page disappeared:
+            if (pagination.getPageFirstItem() >= count) {
+                pagination.previousPage();
+            }
+        }
+        if (selectedItemIndex >= 0) {
+            current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
+        }
+    }
+
+    public DataModel getItems() {
+        if (items == null) {
+            items = getPagination().createPageDataModel();
+        }
+        return items;
+    }
+
+    private void recreateModel() {
+        items = null;
+    }
+
+    private void recreatePagination() {
+        pagination = null;
+    }
+
+    public String next() {
+        getPagination().nextPage();
+        recreateModel();
+        return "List?faces-redirect=true";
+    }
+
+    public String previous() {
+        getPagination().previousPage();
+        recreateModel();
+        return "List?faces-redirect=true";
+    }
+
+    public SelectItem[] getItemsAvailableSelectMany() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
+    }
+
+    public SelectItem[] getItemsAvailableSelectOne() {
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    @FacesConverter(forClass = Reports.class)
+    public static class ReportsControllerConverter implements Converter {
+
+        public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
+            if (value == null || value.length() == 0) {
+                return null;
+            }
+            ReportsController controller = (ReportsController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "reportsController");
+            return controller.ejbFacade.find(getKey(value));
+        }
+
+        java.lang.Integer getKey(String value) {
+            java.lang.Integer key;
+            key = Integer.valueOf(value);
+            return key;
+        }
+
+        String getStringKey(java.lang.Integer value) {
+            StringBuffer sb = new StringBuffer();
+            sb.append(value);
+            return sb.toString();
+        }
+
+        public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof Reports) {
+                Reports o = (Reports) object;
+                return getStringKey(o.getRId());
+            } else {
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + ReportsController.class.getName());
+            }
+        }
+    }
+
+    /**
+     * Generate Report and Saves its Data in Database
+     *
+     * @return String
+     */
+    public String generateReport() {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        logger.log("trying to generate Report from eBay Stock", "INFO");
+        String CONFIG_PROPERTIES = this.getClass().getClassLoader().getResource("configfile.xml").getPath();
+        XMLParser parser = new XMLParser(CONFIG_PROPERTIES);
+        String jobType = parser.getReportType();
+        logger.log("Successfully retreivd Report Type from Configuration File [" + jobType + "]", "INFO");
+
+        String[] array = createDownloadPath();
+        String reportFilePath = array[2];
+        boolean done = this.generateinvenotryReport(jobType, reportFilePath);
+        if (done) {
+            Reports report = new Reports();
+            report.setFileName(reportFilePath);
+
+            File reportFile = new File(reportFilePath);
+            String[] temp = null;
+            if (reportFile.exists()) {
+                temp = fileDateTime(reportFilePath);
+                report.setReportDate(new Date(temp[0]));
+                report.setReportTime(temp[1]);
+            } else {
+                report.setReportDate(new Date(array[0].replace("-", "/")));
+                report.setReportTime(array[1]);
+            }
+
+            Users user = getUsersFacade().findByUserName(getUserNameFromSession());
+            report.setUser(user);
+
+            ValidEntry ve = new ValidEntry();
+            ve.setVeId(DownloadFiles.SUCCESS.value());
+            ve.setVeName(DownloadFiles.SUCCESS.name());
+            report.setStatus(ve);
+
+            ValidEntry ve1 = new ValidEntry();
+            ve1.setVeId(ReportTypes.INVENTORY.value());
+            ve1.setVeName(ReportTypes.INVENTORY.name());
+            report.setReportType(ve1);
+
+            ValidEntry ve2 = new ValidEntry();
+            ve2.setVeId(ReportLoadStatus.NOT_YET.value());
+            ve2.setVeName(ReportLoadStatus.NOT_YET.name());
+            report.setLoadStatus(ve2);
+
+            try {
+                getFacade().create(report);
+                logger.log("Successfully saved Data of Report [" + report.getFileName() + "] into Database", "INFO");
+                logger.log("Report generated Successfully", "INFO");
+                JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("ReportsCreated"));
+                return prepareList();
+            } catch (Exception e) {
+                logger.log("failed to save Data of Report [" + report.getFileName() + "] into Database, due to This Exception [" + ExceptionHandler.getStackTraceAsString(e) + "]", "EXCEPTION");
+                JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+                return prepareList();
+            }
+        } else {
+            logger.log("failed to generate Report from eBay Stock", "ERROR");
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("ReportError"));
+            return null;
+        }
+    }
+
+    /**
+     * Creating Download Folder for the Report Files
+     *
+     * @return String represents the Folder Path
+     */
+    public String[] createDownloadPath() {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        try {
+            String CONFIG_PROPERTIES = this.getClass().getClassLoader().getResource("configfile.xml").getPath();
+            String[] temp = currentDateTime();
+            XMLParser parser = new XMLParser(CONFIG_PROPERTIES);
+            File reportsPath = new File(parser.getReportFilesPath() + temp[0]);
+            String zipFilePath = "";
+            boolean mkdirsResult = false;
+            String[] output = null;
+            if (reportsPath.exists()) {
+                logger.log("Directory[" + reportsPath.getAbsolutePath() + "] already exists ", "INFO");
+                File zipFile = new File(reportsPath.getAbsolutePath() + File.separator + "Report-" + temp[1] + ".zip");
+                zipFilePath = zipFile.getAbsolutePath();
+                output = new String[]{temp[0], temp[1], zipFilePath};
+                logger.log("Report File [" + zipFilePath + "]", "INFO");
+                return output;
+            } else {
+                mkdirsResult = reportsPath.mkdirs();
+                if (mkdirsResult) {
+                    File zipFile = new File(reportsPath.getAbsolutePath() + File.separator + "Report-" + temp[1] + ".zip");
+                    zipFilePath = zipFile.getAbsolutePath();
+                    output = new String[]{temp[0], temp[1], zipFilePath};
+                    logger.log("Report File [" + zipFilePath + "]", "INFO");
+                    return output;
+                } else {
+                    logger.log("failed to create Report File [" + zipFilePath + "], So New File Report File [" + parser.getReportFilesPath() + "]", "ERROR");
+                    output = new String[]{temp[0], temp[1], parser.getReportFilesPath()};
+                    return output;
+                }
+            }
+        } catch (Exception ex) {
+            logger.log("failed to create Report File Path due to this Exception [" + ExceptionHandler.getStackTraceAsString(ex) + "]", "EXCEPTION");
+            return null;
+        }
+    }
+
+    /**
+     *
+     * This Method gets the Current Date and time
+     *
+     * @return String Array of Date and Time...
+     */
+    public String[] currentDateTime() {
+        Date d = new Date();
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Copenhagen");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(timeZone);
+        String dateString = sdf.format(d);
+        return dateString.split(" ");
+    }
+
+    /**
+     * Method to Generate Inventory Report from eBay Stock
+     *
+     * @param jobType
+     * @param downloadFileName
+     *
+     * @return boolean
+     */
+    public boolean generateinvenotryReport(String jobType, String downloadFileName) {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        boolean done = false;
+        String jobid = "";
+        try {
+            logger.log("excuting Report Steps", "INFO");
+
+            BulkDataExchangeActions bdeActions = new BulkDataExchangeActions(getLogsFacade());
+            logger.log("trying to start Report Download Job", "INFO");
+            StartDownloadJobResponse sdljResp = bdeActions.startDownloadJob(jobType, null);
+
+            String JobStatusQueryInterval = bdeActions.getJobQueryInterval();
+            logger.log("Query Interval [" + JobStatusQueryInterval + "]", "INFO");
+
+            BaseServiceResponse baseRep = sdljResp;
+            if (!isSuccess(baseRep)) {
+                logger.log("Report Start Download Job Response didn't pass Response Check", "ERROR");
+                return done;
+            } else {
+                logger.log("Report Start Download Job Response passed Response Check Successfully", "INFO");
+                logger.log("Report Download Job started Successfully", "INFO");
+            }
+
+            jobid = sdljResp.getJobId();
+            done = doDownload(downloadFileName, jobid, JobStatusQueryInterval);
+
+            return done;
+        } catch (Exception ex) {
+            logger.log("failed to Download The Report due to This Exception [" + ExceptionHandler.getStackTraceAsString(ex) + "]", "EXCEPTION");
+            return done;
+        }
+    }
+
+    /**
+     * Method to Test responses is it succeeded or no...
+     *
+     * @param response
+     *
+     * @return boolean
+     */
+    private boolean isSuccess(BaseServiceResponse response) {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        boolean done = true;
+        ErrorMessage errorMsg = null;
+        if (response != null) {
+            if (!response.getAck().equals(AckValue.SUCCESS)) {
+                errorMsg = new ErrorMessage();
+                if (errorMsg != null) {
+                    ErrorData error = response.getErrorMessage().getError().get(0);
+                    if (response.getAck().equals(AckValue.WARNING)) {
+                        logger.log("Response passed Status Check with this Warning [" + error.getMessage() + "]", "WARNING");
+                    } else if (response.getAck().equals(AckValue.FAILURE) || response.getAck().equals(AckValue.PARTIAL_FAILURE)) {
+                        done = false;
+                        logger.log("Response failed to pass Status Check due to this Error [" + error.getMessage() + "]", "ERROR");
+                    }
+                }
+            }
+        } else {
+            done = false;
+        }
+        return done;
+    }
+
+    /**
+     *
+     *
+     * @param downloadFileName
+     * @param jobId
+     * @param JobStatusQueryInterval
+     *
+     * @return boolean
+     */
+    private boolean doDownload(String downloadFileName, String jobId, String JobStatusQueryInterval) {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        logger.log("Now downloading Inventory Report ", "INFO");
+        BulkDataExchangeActions bdeActions = new BulkDataExchangeActions(getLogsFacade());
+        FileTransferActions ftActions = new FileTransferActions(getLogsFacade());
+        boolean fileProcessIsDone = false;
+        boolean downloadIsDone = false;
+        if (JobStatusQueryInterval.length() == 0) {
+            JobStatusQueryInterval = "10000";
+        }
+        do {
+            JobProfile job = null;
+            GetJobStatusResponse getJobStatusResp = bdeActions.getJobStatus(jobId);
+            BaseServiceResponse baseRep = getJobStatusResp;
+            if (!isSuccess(baseRep)) {
+                logger.log("can not retrieve Job Status from Job Status Response", "ERROR");
+                return false;
+            }
+
+            job = retrieveOneJobStatus(getJobStatusResp);
+
+            if (job.getJobStatus().equals(JobStatus.COMPLETED) && job.getPercentComplete() == 100.0) {
+                logger.log("Report Job Status [" + job.getJobStatus() + "] Successfully", "INFO");
+                fileProcessIsDone = true;
+                DownloadFileResponse downloadFileResp = ftActions.downloadReportFile(downloadFileName, jobId, job.getFileReferenceId(), getLogsFacade());
+                if (downloadFileResp != null) {
+                    baseRep = downloadFileResp;
+                    if (isSuccess(baseRep)) {
+                        logger.log("Writing Report Response to The Compressed File ", "INFO");
+                        downloadIsDone = true;
+                        FileAttachment attachment = downloadFileResp.getFileAttachment();
+                        DataHandler dh = attachment.getData();
+                        try {
+                            InputStream in = dh.getInputStream();
+                            BufferedInputStream bis = new BufferedInputStream(in);
+
+                            FileOutputStream fo = new FileOutputStream(new File(downloadFileName)); // "C:/myDownLoadFile.gz"
+                            BufferedOutputStream bos = new BufferedOutputStream(fo);
+                            int bytes_read = 0;
+                            byte[] dataBuf = new byte[4096];
+                            while ((bytes_read = bis.read(dataBuf)) != -1) {
+                                bos.write(dataBuf, 0, bytes_read);
+                            }
+                            bis.close();
+                            bos.flush();
+                            bos.close();
+                            logger.log("finished Writing Report Response to The Compressed File ", "INFO");
+                        } catch (IOException e) {
+                            logger.log("failed to write Report Response to the Compressed File due to this Exception [" + ExceptionHandler.getStackTraceAsString(e) + "]", "EXCEPTION");
+                        }
+                    }
+                }
+            } else if (job.getJobStatus().equals(JobStatus.FAILED) || job.getJobStatus().equals(JobStatus.ABORTED)) {
+                logger.log("Report Job Status[" + job.getJobStatus() + "]", "ERROR");
+                return false;
+            } else {
+                try {
+                    Thread.sleep(Integer.parseInt(JobStatusQueryInterval));
+                } catch (InterruptedException x) {
+                    logger.log("Job Status Waiting period iterrupted due to this Exception [" + ExceptionHandler.getStackTraceAsString(x) + "]", "EXCEPTION");
+                    fileProcessIsDone = false;
+                    downloadIsDone = false;
+                }
+            }
+        } while (!fileProcessIsDone);
+
+        return downloadIsDone;
+    }
+
+    /**
+     *
+     * @param jobStatusResp
+     *
+     * @return JopProfile
+     */
+    private static JobProfile retrieveOneJobStatus(GetJobStatusResponse jobStatusResp) {
+        JobProfile job = null;
+        if (jobStatusResp != null) {
+            List<JobProfile> listOfJobs = jobStatusResp.getJobProfile();
+            if (listOfJobs.size() == 1) {
+                Iterator itr = listOfJobs.iterator();
+                job = (JobProfile) itr.next();
+            }
+        }
+        return job;
+    }
+
+    /**
+     * trying to extract the report File and then open it in browser...
+     *
+     * @return Page Name as String
+     */
+    public String openFile() {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        current = (Reports) getItems().getRowData();
+        logger.log("Now trying to open Report File [" + current.getFileName() + "]", "INFO");
+        String reportFile = current.getFileName();
+        String extractedFile = CompressFiles.unZip(reportFile, getLogsFacade());
+        BrowserControl browserControl = new BrowserControl(getLogsFacade());
+        browserControl.openFile(extractedFile);
+        return "List?faces-redirect=true";
+    }
+
+    /**
+     * Load Inventory Report File into Database
+     *
+     * @return String
+     */
+    public String loadFile() {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        current = (Reports) getItems().getRowData();
+        try {
+            String reportFile = current.getFileName();
+            logger.log(" trying to load Report File [" + reportFile + "] into Database ", "INFO");
+            String extractedFile = CompressFiles.unZip(reportFile, getLogsFacade());
+
+            String CONFIG_PROPERTIES = this.getClass().getClassLoader().getResource("configfile.xml").getPath();
+            FileEditing fe = new FileEditing(CONFIG_PROPERTIES);
+            String schemaName = fe.getTagInfo("Catalogname");
+            String tableName = fe.getTagInfo("table-name");
+            String driver = fe.getTagInfo("Driver");
+            String passWord = fe.getTagInfo("Userpassword");
+            String userName = fe.getTagInfo("Username");
+            String url = fe.getTagInfo("URL") + fe.getTagInfo("Hostname") + "/" + schemaName;
+            DataBaseHandler db = new DataBaseHandler(driver, url, userName, passWord);
+            db.excuteUpdate("truncate " + schemaName + "." + tableName);
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(true);
+            SAXParser saxParser;
+            saxParser = factory.newSAXParser();
+            ResponseSAXHandller saxHandler = ResponseSAXHandller.getInstance();
+            saxHandler.setTableName(schemaName + "." + tableName);
+            saxHandler.setDatabase(db);
+            saxParser.parse(new File(extractedFile), saxHandler);
+            String supplierSchema = fe.getTagInfo("Suppliers-Schema");
+
+            db.excuteUpdate("update " + schemaName + "." + tableName + " set SuppId = (select SuppId from " + supplierSchema + ".suppliers where Sku = substring(SellerSku,1,3))");
+
+            ValidEntry ve = new ValidEntry();
+            ve.setVeId(ReportLoadStatus.LOADED.value());
+            ve.setVeName(ReportLoadStatus.LOADED.name());
+            current.setLoadStatus(ve);
+            getFacade().edit(current);
+
+            logger.log("Successfully loaded Report File [" + reportFile + "]  into Database ", "INFO");
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("ReportsLoaded"));
+            return prepareList();
+        } catch (ParserConfigurationException ex) {
+            logger.log("failed to load Report File [" + current.getFileName() + "] into database due to this Exception [" + ExceptionHandler.getStackTraceAsString(ex) + "]", "EXCEPTION");
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return "List?faces-redirect=true";
+        } catch (Exception ex) {
+            logger.log("failed to load Report File [" + current.getFileName() + "] into database due to this Exception [" + ExceptionHandler.getStackTraceAsString(ex) + "]", "EXCEPTION");
+            JsfUtil.addErrorMessage(ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            return "List?faces-redirect=true";
+        }
+    }
+
+    /**
+     *
+     * This Method gets Date and time of the Passed File Name
+     *
+     * @param filePath
+     *
+     * @return String Array of Date and Time...
+     */
+    public String[] fileDateTime(String filePath) {
+        LoggingManager logger = new LoggingManager(getLogsFacade());
+        try {
+            File f = new File(filePath);
+            long datetime = f.lastModified();
+            Date d = new Date(datetime);
+            TimeZone timeZone = TimeZone.getTimeZone("Europe/Copenhagen");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            sdf.setTimeZone(timeZone);
+            String dateString = sdf.format(d);
+            String[] temp = dateString.split(" ");
+            return temp;
+        } catch (Exception e) {
+            logger.log("failed to get Modified Date of File [" + filePath + "] due to this Exception [" + ExceptionHandler.getStackTraceAsString(e) + "]", "EXCEPTION");
+            return new String[]{"1970-12-31", "========="};
+        }
+    }
+
+    /**
+     * Get user Name from the Session...
+     *
+     * @return String
+     */
+    public String getUserNameFromSession() {
+        HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
+        String userName = session.getValue("userName").toString();
+        return userName;
+    }
+}

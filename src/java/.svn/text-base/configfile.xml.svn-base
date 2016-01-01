@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : configfile.xml
+    Created on : May 6, 2012, 11:02 PM
+    Author     : tmiller
+    Description:
+        Purpose of the document follows.
+-->
+
+<root>
+    <Support-Mail>internalsystem@bookdepository.co.uk</Support-Mail>
+    <Support-Password>1nT__$|$</Support-Password>
+    <Server>smtp1.bookdepository.co.uk</Server>
+    <Port>27</Port>
+    <Listing-Files-Path>/home/tmiller/Desktop/eBayListingFiles/</Listing-Files-Path>
+    <download-Files-Path>/home/tmiller/Desktop/eBayDownloadResult/</download-Files-Path>
+    <Inventory-reports-path>/home/tmiller/Desktop/InventoryReports/</Inventory-reports-path>
+    <report-type>ActiveInventoryReport</report-type>
+    <table-name>ebay_list_au</table-name>
+    <Driver>com.mysql.jdbc.Driver</Driver>
+    <URL>jdbc:mysql://</URL>	
+    <Hostname>192.168.40.208:3306</Hostname>
+    <Username>tmiller</Username>
+    <Userpassword>$IS_Bakar_@hmed$</Userpassword>
+    <Catalogname>ebay</Catalogname>
+    <Suppliers-Schema>ebay</Suppliers-Schema>
+    <open-program-name>firefox</open-program-name>
+    <open-file-path>/home/tmiller/Desktop/eBayCofigFile/</open-file-path>
+</root>

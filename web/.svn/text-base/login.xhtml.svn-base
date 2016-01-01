@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Login</title>
+    </h:head>
+    <h:body>
+        <h2 align="center">Login</h2>
+        <h:panelGroup id="messagePanel" layout="block">
+            <h:messages globalOnly="true" errorStyle="color: red" infoStyle="color: green" layout="table"/>
+        </h:panelGroup>
+        <h:form id="form"> 
+            <h:panelGrid columns="3">
+                <h:outputLabel value="User Name:"  for="userName"/>
+                <p:inputText id="userName" value="#{usersController.userName}" required="true" requiredMessage="* Required Field"/>
+                <h:message style="color: red" for="userName" id="userNameError" />
+                <h:outputLabel value="Password: " for="userPassword"/>
+                <p:password id="userPassword" value="#{usersController.password}" required="true" requiredMessage="* Required Field"/>
+                <h:message style="color: red" for="userPassword" id="userPasswordError" />
+            </h:panelGrid>
+            <br/>
+            <h:commandButton value="Login" action="#{usersController.loginCheck }" type="submit" />
+        </h:form>
+        <h:form>
+            <h:commandLink action="#{usersController.forgetpassword}" value="Forget Password"/>
+        </h:form>
+    </h:body>
+</html>
+

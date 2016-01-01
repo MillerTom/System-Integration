@@ -1,0 +1,243 @@
+package model;
+/*
+ * DataBaseHandler.java
+ *
+ * Created on 13 july, 2007, 02:44 �
+ *
+ * To change this template, choose Tools | Template Manager
+ * and open the template in the editor.
+ */
+
+import java.io.File;
+import java.sql.*;
+import java.util.Calendar;
+
+/**
+ *
+ * @author Abdel-Mawla
+ */
+public class DataBaseHandler {
+    
+    /** Creates a new instance of DataBaseHandler */
+    public static Connection con;
+    private String driverName;
+    private String url;
+    public  ResultSet rs;
+    public  Statement stm;
+    public DatabaseMetaData meta;
+    private String userName;
+    private String password;
+    
+    
+    public DataBaseHandler(String driver,String url,String userName,String password) throws Exception{
+//        System.out.println("driver: "+driver +"  url: "+url+" userName: "+userName+" password:  "+ password);
+        this.driverName=driver;
+        this.url=url;
+        this.userName=userName;
+        this.password=password;
+        this.connect();
+    }
+    
+    
+    public void connect() {
+        try {
+            Class.forName(driverName).newInstance();
+            con= DriverManager.getConnection(url, userName, password);
+            stm=con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            meta = con.getMetaData();
+        } catch (Exception ex) {
+//            System.out.println("DataBaseHandler connect() Exception " + ex+" at "+Calendar.getInstance().getTime());
+            ex.printStackTrace();
+        }
+        
+    }
+    
+    /**
+     * this method responsible on checking if connection is closed or opened, and re-opening it
+     * @return 
+     */
+    public boolean checkConnection(){
+        try{
+            if(this.con.isClosed() ){
+//                System.out.println("Connection is closed, Reconnecting....  at ===> "+Calendar.getInstance().getTime());
+                this.connect();                
+            } else
+                return true;
+        } catch(Exception ex){
+//            System.out.println("DataBaseHandler excuteUpdate() Exception " + ex+" at "+Calendar.getInstance().getTime());
+        }
+        return false;
+    }
+    
+    public void excuteUpdate(String excuteStatement) throws SQLException{
+        if(this.checkConnection()){
+//            System.out.println("excute " + excuteStatement);
+            try {
+                int affectedRecs = stm.executeUpdate(excuteStatement);
+//                System.out.println("affectedRecs " + affectedRecs);
+            } catch (SQLException ex) {
+//                System.out.println("DataBaseHandler : excuteUpdate() : jdbc.CommunicationsException "+ ex+" at "+Calendar.getInstance().getTime()); 
+                String exp = ex.toString();
+                if(exp.contains("Communications link failure due to underlying exception")){
+//                    System.out.println("DataBaseHandler : excuteUpdate() : reconnect  at "+Calendar.getInstance().getTime());  
+                    this.connect();
+//                    System.out.println("DataBaseHandler : excuteUpdate() : reconnect Done at "+Calendar.getInstance().getTime());  
+                    this.excuteUpdate(excuteStatement);
+              }else if(exp.contains("Lock wait timeout exceeded") || exp.contains("Deadlock found when trying to get lock")){
+                    try {
+                        if(exp.contains("Lock wait timeout exceeded")){
+//                            System.out.println("** LOCK WAIT EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }else if(exp.contains("Deadlock found when trying to get lock")){
+//                            System.out.println("** MySQLTransactionRollbackException EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }
+                        Thread.sleep(120000);
+                        excuteUpdate(excuteStatement);
+                    } catch (InterruptedException ex1) {
+                        ex1.printStackTrace();
+                    }
+                } else {throw new SQLException(ex);}
+            }
+        } 
+//        else
+//            System.out.println("DataBaseHandler : excuteUpdate() : Cannot execute query, Connection Closed .... ");
+    }
+    
+    
+    public  String[][] excuteQuery(String selectStatement) throws SQLException{
+        
+        int numerOfRows=0;
+        int numerOfColumns=0;
+        String resultSet[][]=null;
+        
+        if(this.checkConnection()){
+//            System.out.println("excute   "+selectStatement);
+            try {
+                rs=stm.executeQuery(selectStatement);
+                numerOfColumns=rs.getMetaData().getColumnCount();
+                rs.last();
+                numerOfRows=rs.getRow();
+                rs.beforeFirst();
+                resultSet=new String[numerOfRows][numerOfColumns];
+                
+                for(int row=0;row<numerOfRows;row++){
+                    rs.next();
+                    for(int column=0;column<numerOfColumns;column++){
+                        resultSet[row][column]=rs.getString(column+1)+"";                        
+                    }                    
+                }
+                rs.close();
+            } catch (SQLException ex) {
+//                System.out.println("DataBaseHandler : excuteQuery() : jdbc.CommunicationsException "+ ex+" at "+Calendar.getInstance().getTime());        
+                String exp = ex.toString();
+                if(exp.contains("Communications link failure due to underlying exception")){
+//                    System.out.println("DataBaseHandler : excuteQuery() : reconnect "+ ex+" at "+Calendar.getInstance().getTime());        
+                    this.connect();
+//                    System.out.println("DataBaseHandler : excuteQuery() : reconnect Done at "+Calendar.getInstance().getTime());  
+                    resultSet=this.excuteQuery(selectStatement);
+               }else if(exp.contains("Lock wait timeout exceeded") || exp.contains("Deadlock found when trying to get lock")){
+                    try {
+                        if(exp.contains("Lock wait timeout exceeded")){
+//                            System.out.println("** LOCK WAIT EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }else if(exp.contains("Deadlock found when trying to get lock")){
+//                            System.out.println("** MySQLTransactionRollbackException EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }
+                        Thread.sleep(120000);                       
+                        excuteQuery(selectStatement);
+                    } catch (InterruptedException ex1) {
+                        ex1.printStackTrace();
+                    }
+                } else {throw new SQLException(ex);}
+            }
+        } 
+//        else
+//            System.out.println("DataBaseHandler : excuteQuery() : Cannot execute query, Connection Closed .... ");        
+        return resultSet;
+    }
+    
+    
+    public void closeConnection() throws SQLException{
+        con.close();
+        stm.close();
+    }
+    
+    public void executeQueryRs(String query) throws SQLException{
+        if(this.checkConnection()){
+            try {
+                rs = stm.executeQuery(query);
+                rs.close();
+            } catch (SQLException ex) {
+//                System.out.println("DataBaseHandler : excuteQuery() : jdbc.CommunicationsException "+ ex+" at "+Calendar.getInstance().getTime());        
+                String exp = ex.toString();
+                if(exp.contains("Communications link failure due to underlying exception")){
+//                    System.out.println("DataBaseHandler : excuteQuery() : reconnect "+ ex+" at "+Calendar.getInstance().getTime());        
+                    this.connect();
+//                    System.out.println("DataBaseHandler : excuteQuery() : reconnect Done at "+Calendar.getInstance().getTime());  
+                    executeQueryRs(query);               
+                 }else if(exp.contains("Lock wait timeout exceeded") || exp.contains("Deadlock found when trying to get lock")){
+                    try { 
+                        if(exp.contains("Lock wait timeout exceeded")){
+//                            System.out.println("** LOCK WAIT EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }else if(exp.contains("Deadlock found when trying to get lock")){
+//                            System.out.println("** MySQLTransactionRollbackException EXCEPTION .. TRYING AGAIN IN 120 SECONDS ...");
+                        }
+                        Thread.sleep(120000);                       
+                        executeQueryRs(query);
+                    } catch (InterruptedException ex1) {
+                        ex1.printStackTrace();
+                    }
+                } else {throw new SQLException(ex);}
+            }
+        } 
+//else
+//            System.out.println("DataBaseHandler : executeQueryRs() : Cannot execute query, Connection Closed .... ");
+    }
+    
+    @Override
+    public String toString(){
+        return "driver: "+driverName +"  url: "+url+" userName: "+userName+" password:  "+ password;
+    }
+    
+    /**
+     * excute INTO OUTFILE statements and delete the output file if it aleardy exits
+     * @param sqlStatement INTO OUTFILE statement
+     * @param filePath the output file that will be generated 
+     */
+    public void generateSQLFile(String sqlStatement,String filePath){
+        boolean delFlag = false;
+        int trial=0;
+        try {            
+            stm.execute(sqlStatement);
+        } catch (SQLException ex) {
+            String exp = ex.toString();
+            if (exp.contains("already exists")) {
+//                System.out.println("DataBaseHandler : generateSQLFile() : File "+filePath+" is aleardy exists ... we will try to delete the existing one");
+                while (!delFlag&&trial<5) {                    
+                    File f = new File(filePath);
+                    delFlag = f.delete();
+                    trial ++;
+                }
+                generateSQLFile(sqlStatement, filePath);
+            }
+        }
+    }
+    
+    public void restoreTable(String table_name) {
+        if(this.checkConnection()){
+            try{
+                //deleting all records
+                String query = "DELETE FROM " + table_name;
+                stm.execute(query);
+//                System.out.println(query +"executed");
+                //restoring the auto increment collumn to 1
+                query = "ALTER TABLE " + table_name + " AUTO_INCREMENT=1";
+//                System.out.println(query +"executed");
+                stm.execute(query);
+            } catch(Exception ex){
+//                System.out.println("BDLatestUpdate restoreTable Exception " + ex);
+            }
+        } else{
+//            System.out.println("DataBaseHandler : restoreTable() : Cannot execute query, Connection Closed .... ");
+        }
+    }
+    
+}

@@ -1,0 +1,143 @@
+annotation.processing.enabled=true
+annotation.processing.enabled.in.editor=true
+annotation.processing.processor.options=-Aeclipselink.canonicalmodel.use_static_factory=false
+annotation.processing.processors.list=
+annotation.processing.run.all.processors=true
+annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+auxiliary.org-netbeans-modules-projectapi.jsf_2e_language=Facelets
+build.classes.dir=${build.web.dir}/WEB-INF/classes
+build.classes.excludes=**/*.java,**/*.form
+build.dir=build
+build.generated.dir=${build.dir}/generated
+build.generated.sources.dir=${build.dir}/generated-sources
+build.test.classes.dir=${build.dir}/test/classes
+build.test.results.dir=${build.dir}/test/results
+build.web.dir=${build.dir}/web
+build.web.excludes=${build.classes.excludes}
+client.urlPart=
+compile.jsps=false
+conf.dir=${source.root}/conf
+debug.classpath=${build.classes.dir}:${javac.classpath}
+debug.test.classpath=\
+    ${run.test.classpath}
+display.browser=true
+dist.dir=dist
+dist.ear.war=${dist.dir}/${war.ear.name}
+dist.javadoc.dir=${dist.dir}/javadoc
+dist.war=${dist.dir}/${war.name}
+endorsed.classpath=\
+    ${libs.javaee-endorsed-api-6.0.classpath}
+excludes=
+file.reference.activation.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/activation.jar
+file.reference.commons-compress-1.2.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/commons-compress-1.2.jar
+file.reference.commons-io-2.1.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/commons-io-2.1.jar
+file.reference.FastInfoset.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/FastInfoset.jar
+file.reference.FileTransferService_BulkDataExchangeService.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/FileTransferService_BulkDataExchangeService.jar
+file.reference.gmbal-api-only.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/gmbal-api-only.jar
+file.reference.http.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/http.jar
+file.reference.jaxb-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxb-api.jar
+file.reference.jaxb-impl.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxb-impl.jar
+file.reference.jaxb-xjc.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxb-xjc.jar
+file.reference.jaxws-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxws-api.jar
+file.reference.jaxws-rt.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxws-rt.jar
+file.reference.jaxws-tools.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jaxws-tools.jar
+file.reference.jsr173_api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jsr173_api.jar
+file.reference.jsr181-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jsr181-api.jar
+file.reference.jsr250-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/jsr250-api.jar
+file.reference.management-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/management-api.jar
+file.reference.mimepull.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/mimepull.jar
+file.reference.mysql-connector-java-5.1.13-bin.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/mysql-connector-java-5.1.13-bin.jar
+file.reference.policy.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/policy.jar
+file.reference.primefaces-3.3.1.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/primefaces-3.3.1.jar
+file.reference.saaj-api.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/saaj-api.jar
+file.reference.saaj-impl.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/saaj-impl.jar
+file.reference.stax-ex.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/stax-ex.jar
+file.reference.streambuffer.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/streambuffer.jar
+file.reference.woodstox.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/woodstox.jar
+file.reference.xercesImpl.jar=/home/tmiller/NetBeansProjects/lib/eBayLibs/xercesImpl.jar
+includes=**
+j2ee.compile.on.save=true
+j2ee.deploy.on.save=true
+j2ee.platform=1.6-web
+j2ee.platform.classpath=${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation.jar:${j2ee.server.home}/modules/javax.jms.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/jersey-core.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/jstl-impl.jar:${j2ee.server.home}/modules/javax.ejb.jar:${j2ee.server.home}/modules/javax.servlet.jar:${j2ee.server.home}/modules/jsf-api.jar:${j2ee.server.home}/modules/javax.security.jacc.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar:${j2ee.server.home}/modules/jsf-impl.jar:${j2ee.server.home}/modules/javax.enterprise.deploy.jar:${j2ee.server.home}/modules/endorsed/jaxb-api-osgi.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.management.j2ee.jar:${j2ee.server.home}/modules/javax.resource.jar:${j2ee.server.home}/modules/javax.transaction.jar:${j2ee.server.home}/modules/javax.security.auth.message.jar
+j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api-osgi.jar:${j2ee.server.home}/modules/javax.ejb.jar
+j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api-osgi.jar:${j2ee.server.home}/modules/javax.ejb.jar
+j2ee.platform.wsit.classpath=
+j2ee.server.type=gfv3ee6
+jar.compress=false
+javac.classpath=\
+    ${file.reference.activation.jar}:\
+    ${file.reference.FastInfoset.jar}:\
+    ${file.reference.FileTransferService_BulkDataExchangeService.jar}:\
+    ${file.reference.gmbal-api-only.jar}:\
+    ${file.reference.http.jar}:\
+    ${file.reference.jaxb-api.jar}:\
+    ${file.reference.jaxb-impl.jar}:\
+    ${file.reference.jaxb-xjc.jar}:\
+    ${file.reference.jaxws-api.jar}:\
+    ${file.reference.jaxws-rt.jar}:\
+    ${file.reference.jaxws-tools.jar}:\
+    ${file.reference.jsr173_api.jar}:\
+    ${file.reference.jsr181-api.jar}:\
+    ${file.reference.jsr250-api.jar}:\
+    ${file.reference.management-api.jar}:\
+    ${file.reference.mimepull.jar}:\
+    ${file.reference.mysql-connector-java-5.1.13-bin.jar}:\
+    ${file.reference.policy.jar}:\
+    ${file.reference.primefaces-3.3.1.jar}:\
+    ${file.reference.saaj-api.jar}:\
+    ${file.reference.saaj-impl.jar}:\
+    ${file.reference.stax-ex.jar}:\
+    ${file.reference.streambuffer.jar}:\
+    ${file.reference.woodstox.jar}:\
+    ${file.reference.commons-compress-1.2.jar}:\
+    ${file.reference.commons-io-2.1.jar}:\
+    ${file.reference.xercesImpl.jar}
+# Space-separated list of extra javac options
+javac.compilerargs=
+javac.debug=true
+javac.deprecation=false
+javac.processorpath=\
+    ${javac.classpath}:\
+    ${libs.eclipselink.classpath}:\
+    ${libs.eclipselinkmodelgen.classpath}
+javac.source=1.6
+javac.target=1.6
+javac.test.classpath=\
+    ${javac.classpath}:\
+    ${build.classes.dir}
+javac.test.processorpath=\
+    ${javac.test.classpath}
+javadoc.additionalparam=
+javadoc.author=false
+javadoc.encoding=${source.encoding}
+javadoc.noindex=false
+javadoc.nonavbar=false
+javadoc.notree=false
+javadoc.preview=true
+javadoc.private=false
+javadoc.splitindex=true
+javadoc.use=true
+javadoc.version=false
+javadoc.windowtitle=
+lib.dir=${web.docbase.dir}/WEB-INF/lib
+persistence.xml.dir=${conf.dir}
+platform.active=default_platform
+resource.dir=setup
+run.test.classpath=\
+    ${javac.test.classpath}:\
+    ${build.test.classes.dir}
+# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+runmain.jvmargs=
+source.encoding=UTF-8
+source.root=src
+src.dir=${source.root}/java
+test.src.dir=test
+war.content.additional=
+war.ear.name=${war.name}
+war.name=eBay.war
+web.docbase.dir=web
+webinf.dir=web/WEB-INF

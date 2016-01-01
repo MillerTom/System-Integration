@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/local_repos/!svn/ver/581/eBay/src/java/daos
+END
+ValidEntryFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/local_repos/!svn/ver/581/eBay/src/java/daos/ValidEntryFacade.java
+END
+AbstractFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/local_repos/!svn/ver/581/eBay/src/java/daos/AbstractFacade.java
+END
+LogsFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/local_repos/!svn/ver/581/eBay/src/java/daos/LogsFacade.java
+END
+ReportsFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/local_repos/!svn/ver/581/eBay/src/java/daos/ReportsFacade.java
+END
+UsersFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/local_repos/!svn/ver/581/eBay/src/java/daos/UsersFacade.java
+END
+FilesFacade.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/local_repos/!svn/ver/581/eBay/src/java/daos/FilesFacade.java
+END

@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/local_repos/!svn/ver/581/eBay/src/java/model
+END
+DataBaseHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/local_repos/!svn/ver/598/eBay/src/java/model/DataBaseHandler.java
+END
+BulkDataExchangeActions.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/local_repos/!svn/ver/598/eBay/src/java/model/BulkDataExchangeActions.java
+END
+BulkDataExchangeCall.java
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/local_repos/!svn/ver/598/eBay/src/java/model/BulkDataExchangeCall.java
+END
+FilesComparator.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/local_repos/!svn/ver/581/eBay/src/java/model/FilesComparator.java
+END
+BookItem.java
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/local_repos/!svn/ver/581/eBay/src/java/model/BookItem.java
+END
+FileEditing.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/local_repos/!svn/ver/598/eBay/src/java/model/FileEditing.java
+END
+LMSSample.java
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/local_repos/!svn/ver/581/eBay/src/java/model/LMSSample.java
+END
+LoggingHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/local_repos/!svn/ver/581/eBay/src/java/model/LoggingHandler.java
+END
+FileTransferActions.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/local_repos/!svn/ver/598/eBay/src/java/model/FileTransferActions.java
+END
+CreateLMSParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/local_repos/!svn/ver/598/eBay/src/java/model/CreateLMSParser.java
+END
+FileTransferCall.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/local_repos/!svn/ver/598/eBay/src/java/model/FileTransferCall.java
+END
+ResponseSAXHandller.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/local_repos/!svn/ver/598/eBay/src/java/model/ResponseSAXHandller.java
+END
+LMSClientJobs.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/local_repos/!svn/ver/581/eBay/src/java/model/LMSClientJobs.java
+END

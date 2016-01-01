@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Folder Name</title>
+    </h:head>
+    <h:body>
+        <h:panelGroup id="messagePanel" layout="block">
+            <h:messages globalOnly="true" errorStyle="color: red" infoStyle="color: green" layout="table"/>
+        </h:panelGroup>
+        <h:form id="form"> 
+            <h:panelGrid columns="3">
+                <h:outputLabel value="Folder Name: "  for="folderName"/>
+                <p:inputText id="folderName" value="#{filesController.folderName}" required="true" requiredMessage="Please Enter Folder Name"/>
+            </h:panelGrid>
+            <h:commandButton value="Display" action="#{filesController.listReviseFiles}" type="submit" />
+            <br/><br/>
+            </h:form>
+        <h:form>
+            <h:commandButton value="Cancel" action="/home" type="submit" />
+        </h:form>
+    </h:body>
+</html>

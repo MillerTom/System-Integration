@@ -1,0 +1,393 @@
+package model;
+
+import java.io.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Comment;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import java.util.*;
+
+/**
+ *
+ * @author Abdel-Mawla
+ */
+public class FileEditing {
+
+    public Document doc;
+    Element subElement;
+    XMLSerializer Xserial;
+    FileWriter Output_File;
+    DocumentBuilderFactory dbf;
+    DocumentBuilder db;
+    OutputFormat format;
+    XMLSerializer serial;
+    String filePath;
+    int tag_level = 0;
+    public static Vector attributes = new Vector();
+
+    /**
+     * Creates a new instance of FileEditing
+     */
+    public FileEditing(String filePath) {
+        try {
+            this.filePath = filePath;
+
+            dbf = DocumentBuilderFactory.newInstance();
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(filePath);
+
+            //setting the format of the file
+            format = new OutputFormat(doc);
+            format.setIndent(5);
+            format.setIndenting(true);
+        } catch (Exception ex) {
+            System.out.println("FileEditing:FileEditing() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+    }
+
+    /**
+     * Modify the given tag with the given value
+     * @param ElementName Name of target tag
+     * @param value The new value that will be set
+     */
+    public void setTagsInfo(String ElementName, String value) {
+        //  Returns a NodeList of all the Elements in document order with a given tag name and are contained in the document
+        NodeList nlist = doc.getElementsByTagName(ElementName);
+        int nodes_length = nlist.getLength();
+        for (int x = 0; x < nodes_length; x++) {
+            // check if The node contains an Element.
+            if (nlist.item(x).getNodeType() == Node.ELEMENT_NODE) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(ElementName)) {
+                    subElement.setTextContent(value);
+                    serializeFile();
+                    break;
+                }
+                if (subElement.hasChildNodes()) {
+                    setTagsInfo(subElement.getTagName(), value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Modify minute attribute in Interval tag
+     * @param value integer value to add to minute attribute (value can be + or -)
+     */
+    public void setIntervalTagInfo(int value) {
+        //  Returns a NodeList of all the Elements in document order with a given tag name and are contained in the document
+        String elementName = "Interval";
+        NodeList nlist = doc.getElementsByTagName(elementName);
+        int nodes_length = nlist.getLength();
+        for (int x = 0; x < nodes_length; x++) {
+            // check if The node contains an Element.
+            if (nlist.item(x).getNodeType() == Node.ELEMENT_NODE) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(elementName)) {
+                    String attvalue = subElement.getAttribute("minute");
+                    if (Integer.parseInt(attvalue) + value == 60 || Integer.parseInt(attvalue) + value > 60) {
+                        subElement.setAttribute("minute", "" + (Integer.parseInt(attvalue) + value - 60));
+                        subElement.setAttribute("hour", "" + (Integer.parseInt(subElement.getAttribute("hour")) + 1));
+                    } else if (Integer.parseInt(attvalue) + value < 0) {
+                        subElement.setAttribute("minute", "" + (Integer.parseInt(attvalue) + value + 60));
+                        subElement.setAttribute("hour", "" + (Integer.parseInt(subElement.getAttribute("hour")) - 1));
+                    } else {
+                        subElement.setAttribute("minute", "" + (Integer.parseInt(attvalue) + value));
+                    }
+                    serializeFile();
+                    break;
+                }
+            }
+        }
+    }
+
+    public LinkedList<String> getMultiTagsInfo(String tagName, String parentTag) {
+        LinkedList<String> values = new LinkedList();
+        try {
+            NodeList nlist = doc.getElementsByTagName(tagName);
+            int nodes_length = nlist.getLength();
+            for (int x = 0; x < nodes_length; x++) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(tagName)) {
+                    if (((Element) subElement.getParentNode()).getTagName().equals(parentTag)) {
+                        values.add(subElement.getTextContent());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("FileEditing:getTagInfo() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+        return values;
+    }
+
+    /**
+     * 
+     * @param parentTag
+     * @param tagName
+     * @param newTagValue
+     */
+    public void addTag(String parentTag, String tagName, String newTagValue) {
+        try {
+            NodeList parentList = doc.getElementsByTagName(parentTag);
+            for (int i = 0; i < parentList.getLength(); i++) {
+                if (parentList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    subElement = (Element) parentList.item(i);
+                    NodeList childlist = subElement.getElementsByTagName(tagName);
+                    if (childlist.getLength() < 1) {
+                        Element newElement = doc.createElement(tagName);
+                        subElement.appendChild(newElement);
+                    }
+                    setTagsInfo(tagName, newTagValue);
+                    serializeFile();
+                    break;
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println("addTag Exception : " + ex);
+        }
+    }
+
+    /**
+     * 
+     * @param tagName
+     * @param commentText
+     */
+    public void addComment(String tagName, String commentText) {
+        try {
+            NodeList list = doc.getElementsByTagName(tagName);
+            for (int i = 0; i < list.getLength(); i++) {
+                if (list.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) list.item(i);
+                    Comment comment = doc.createComment(commentText);
+
+                    element.getParentNode().insertBefore(comment, element.getNextSibling());
+                    serializeFile();
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("addComment Exception : " + ex);
+        }
+    }
+
+    /**
+     * 
+     * @param tagName
+     */
+    public void copyTagValue(String tagName) {
+        String configPath = this.filePath.replaceAll("agent_config", "config");
+        FileEditing distfe = new FileEditing(configPath);
+        String value = distfe.getTagInfo(tagName);
+        if (value != null || !value.equals("")) {
+            setTagsInfo(tagName, value);
+        }
+    }
+
+    /**
+     * 
+     * @param tagName
+     */
+    public void removeTag(String tagName) {
+        NodeList nList = doc.getElementsByTagName(tagName);
+        for (int i = 0; i < nList.getLength(); i++) {
+            if (nList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                doc.removeChild(nList.item(i));
+            }
+        }
+    }
+
+    /**
+     * Getting tag values 
+     * @param TagName
+     * @return
+     */
+    public String getTagInfo(String TagName) {
+        String no_return = "";
+        try {
+            NodeList nlist = doc.getElementsByTagName(TagName);
+            int nodes_length = nlist.getLength();
+
+            for (int x = 0; x < nodes_length; x++) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(TagName)) {
+                    if (subElement.hasAttributes()) {
+                        getAttributes(subElement);
+                        no_return = "no";
+                    }
+                    if (!no_return.equals("no")) {
+                        return subElement.getTextContent();
+                    }
+                }
+                if (subElement.hasChildNodes()) {
+                    getTagInfo(subElement.getTagName());
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("FileEditing:getTagInfo() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+        no_return = "";
+        return "";
+    }
+
+    /**
+     * Getting attrbute values
+     * @param TagName
+     * @return
+     */
+    public Vector getAttInfo(String TagName) {
+        System.out.println("TagName:Fileediting " + TagName);
+        attributes = new Vector();
+        String no_return = "";
+        try {
+            NodeList nlist = doc.getElementsByTagName(TagName);
+            int nodes_length = nlist.getLength();
+
+            for (int x = 0; x < nodes_length; x++) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(TagName)) {
+                    System.out.println("tag name is " + TagName);
+
+                    if (subElement.hasAttributes()) {
+                        getAttributes(subElement);
+                        no_return = "no";
+                    }
+
+                }
+
+            }
+        } catch (Exception ex) {
+            System.out.println("FileEditing:getAttInfo() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+        tag_level = 0;
+        return attributes;
+    }
+
+    /**
+     * 
+     * @param element
+     * @return
+     */
+    public Vector getAttributes(Element element) {
+        try {
+
+            NamedNodeMap attribs = element.getAttributes();
+            for (int x = 0; x < attribs.getLength(); x++) {
+                String attribName = attribs.item(x).getNodeName();
+                String value = attribs.item(x).getTextContent();
+                attributes.add(attribName + ":" + value + ":" + tag_level);
+            }
+            tag_level++;
+        } catch (Exception ex) {
+            System.out.println("FileEditing:getAttributes() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+        return attributes;
+    }
+
+    /**
+     * 
+     */
+    public void serializeFile() {
+        try {
+            Output_File = new FileWriter(filePath);
+            serial = new XMLSerializer(Output_File, format);
+            serial.serialize(doc);
+
+            Output_File.flush();
+            Output_File.close();
+        } catch (Exception ex) {
+            System.out.println("FileEditing:serializeFile() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+    }
+
+    /**
+     * Calculating the number of tags in the xml file
+     * @param TagName
+     * @return
+     */
+    public int getHowManyTags(String TagName) {
+
+        int howMany = 0;
+        try {
+            NodeList nlist = doc.getElementsByTagName(TagName);
+            int nodes_length = nlist.getLength();
+
+            for (int x = 0; x < nodes_length; x++) {
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(TagName)) {
+
+                    howMany++;
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("FileEditing:getHowManyTags() Exception " + ex + " at " + Calendar.getInstance().getTime());
+        }
+
+        return howMany;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Vector getNestedTagInfo(String TagName) {
+        String no_return = "";
+        Vector xx;
+        int flag = 0;
+        Vector finalInterval = new Vector();
+        try {
+            NodeList nlist = doc.getElementsByTagName(TagName);
+            int nodes_length = nlist.getLength();
+            for (int x = 0; x < nodes_length; x++) {
+                //finalInterval.clear();
+                subElement = (Element) nlist.item(x);
+                if (subElement.getTagName().equals(TagName)) {
+
+                    if (subElement.hasChildNodes()) {
+                        for (int i = 0; i < subElement.getChildNodes().getLength(); i++) {
+                            if (subElement.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
+
+                                xx = getAttributes((Element) subElement.getChildNodes().item(i));
+                                for (Object ob : xx) {
+                                    String koko = (String) ob;
+                                    koko += ":" + x;
+                                    if (finalInterval.size() > 0) {
+                                        for (int y = 0; y < finalInterval.size(); y++) {
+                                            if (koko.equals((String) finalInterval.get(y))) {
+                                                flag = 1;
+                                            }
+                                        }
+                                        if (flag == 0) {
+                                            finalInterval.add(koko);
+                                        }
+                                        flag = 0;
+                                    } else {
+                                        finalInterval.add(koko);
+                                    }
+                                }
+                                xx.clear();
+
+
+                            }
+                        }
+                    }
+
+                }
+
+
+            }
+            //ProviderFrame.log(finalInterval);
+        } catch (Exception ex) {
+            System.out.println("FileEditing:getNestedTagInfo() Exception  " + ex + " at " + Calendar.getInstance().getTime());
+        }
+        no_return = "";
+        return finalInterval;
+    }
+}
+
+
+
+

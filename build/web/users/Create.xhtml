@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.CreateUsersTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_firstName}" for="firstName" />
+                    <h:inputText id="firstName" value="#{usersController.selected.firstName}" title="#{bundle.CreateUsersTitle_firstName}" />
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_lastName}" for="lastName" />
+                    <h:inputText id="lastName" value="#{usersController.selected.lastName}" title="#{bundle.CreateUsersTitle_lastName}" />
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_userName}" for="userName" />
+                    <h:inputText id="userName" value="#{usersController.selected.userName}" title="#{bundle.CreateUsersTitle_userName}" required="true" requiredMessage="#{bundle.CreateUsersRequiredMessage_userName}"/>
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_password}" for="password" />
+                    <h:inputText id="password" value="#{usersController.selected.password}" title="#{bundle.CreateUsersTitle_password}" required="true" requiredMessage="#{bundle.CreateUsersRequiredMessage_password}"/>
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_email}" for="email" />
+                    <h:inputText id="email" value="#{usersController.selected.email}" title="#{bundle.CreateUsersTitle_email}" required="true" requiredMessage="#{bundle.CreateUsersRequiredMessage_email}"/>
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_phone}" for="phone" />
+                    <h:inputText id="phone" value="#{usersController.selected.phone}" title="#{bundle.CreateUsersTitle_phone}" />
+                    
+                    <h:outputLabel value="#{bundle.CreateUsersLabel_type}" for="type" />
+                    <h:selectOneMenu id="type" value="#{usersController.selected.type}" title="#{bundle.CreateUsersTitle_type}" >
+                        <f:selectItems value="#{validEntryController.userTypes}"/>
+                    </h:selectOneMenu>
+                    
+                </h:panelGrid>
+                <br />
+                <h:commandLink action="#{usersController.create}" value="#{bundle.CreateUsersSaveLink}" />
+                <br />
+                <br />
+                <h:commandLink action="#{usersController.prepareList}" value="#{bundle.CreateUsersShowAllLink}" immediate="true"/>
+            </h:form>
+            <h:form>
+                <h:commandButton value="Back to Home" action="/home?faces-redirect=true"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

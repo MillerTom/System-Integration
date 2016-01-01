@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.ViewValidEntryTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputText value="#{bundle.ViewValidEntryLabel_veId}"/>
+                    <h:outputText value="#{validEntryController.selected.veId}" title="#{bundle.ViewValidEntryTitle_veId}"/>
+                    <h:outputText value="#{bundle.ViewValidEntryLabel_veName}"/>
+                    <h:outputText value="#{validEntryController.selected.veName}" title="#{bundle.ViewValidEntryTitle_veName}"/>
+                    <h:outputText value="#{bundle.ViewValidEntryLabel_veCategory}"/>
+                    <h:outputText value="#{validEntryController.selected.veCategory}" title="#{bundle.ViewValidEntryTitle_veCategory}"/>
+                    <h:outputText value="#{bundle.ViewValidEntryLabel_veDescribtion}"/>
+                    <h:outputText value="#{validEntryController.selected.veDescribtion}" title="#{bundle.ViewValidEntryTitle_veDescribtion}"/>
+                </h:panelGrid>
+                <br />
+                <h:commandLink action="#{validEntryController.destroyAndView}" value="#{bundle.ViewValidEntryDestroyLink}"/>
+                <br />
+                <br />
+                <h:commandLink action="Edit" value="#{bundle.ViewValidEntryEditLink}"/>
+                <br />
+                <h:commandLink action="#{validEntryController.prepareCreate}" value="#{bundle.ViewValidEntryCreateLink}" />
+                <br />
+                <h:commandLink action="#{validEntryController.prepareList}" value="#{bundle.ViewValidEntryShowAllLink}"/>
+                <br />
+                <br />
+                <h:commandLink value="#{bundle.ViewValidEntryIndexLink}" action="/home" immediate="true" />
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>
